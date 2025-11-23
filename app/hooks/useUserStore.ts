@@ -29,17 +29,15 @@ export const useUserStore = create<UserState>()(
       fetchUser: async () => {
         set({ isLoading: true });
         try {
-          // Mocking data if API fails or no token (for dev visualization)
           try {
             const userData = await UserService.getMe();
             set({ user: userData, isAuthenticated: true });
           } catch (apiError) {
-             // Fallback mock data for development UI preview
              console.warn("API failed, using mock data", apiError);
              const mockUser: User = {
                 id: 1,
-                name: "Rafatul Islam",
-                email: "rafatul@example.com",
+                name: "kalp bisen",
+                email: "kalp@example.com",
                 phone: "9876543210",
                 image: null,
                 role: "user",
@@ -67,7 +65,6 @@ export const useUserStore = create<UserState>()(
           set({ user: updatedUser });
         } catch (error) {
           console.error("Failed to update profile", error);
-          // Optimistic update for demo
           const currentUser = get().user;
           if (currentUser) {
              set({ user: { ...currentUser, ...data } });
@@ -81,11 +78,11 @@ export const useUserStore = create<UserState>()(
         try {
           await UserService.logout();
         } catch (error) {
-          console.error("Logout failed", error);
+          // CHANGED: console.error -> console.warn to prevent red screen overlay
+          console.warn("Logout failed (Network Error), clearing local session anyway", error);
         }
         localStorage.removeItem('accessToken');
         set({ user: null, isAuthenticated: false });
-        // Redirect handled by component
       }
     }),
     {

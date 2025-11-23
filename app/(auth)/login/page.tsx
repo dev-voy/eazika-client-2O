@@ -4,13 +4,13 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Phone, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { ChevronLeft, Phone, Lock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { UserService } from "@/app/services/userService";
 import { useUserStore } from "@/app/hooks/useUserStore";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAuthToken } = useUserStore();
+  const { setAuthToken, logout } = useUserStore();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [phone, setPhone] = useState("");
@@ -18,7 +18,15 @@ export default function LoginPage() {
   const [requestId, setRequestId] = useState("");
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(30);
+  const [errorMessage, setErrorMessage] = useState(""); // New state for specific errors
 
+  // Clear any existing session when landing on Login page
+  useEffect(() => {
+    logout(); 
+    localStorage.removeItem('accessToken');
+  }, []);
+
+  // Timer logic
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (step === 2 && timer > 0) {
@@ -29,22 +37,32 @@ export default function LoginPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length < 10) return alert("Please enter a valid mobile number");
+    setErrorMessage(""); // Clear previous errors
+    
+    // Basic Client Validation
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+        setErrorMessage("Please enter a valid 10-digit mobile number");
+        return;
+    }
     
     setLoading(true);
     try {
-      const data = await UserService.loginUser({ phone });
+      // Send request with cleaned phone number
+      const data = await UserService.loginUser({ phone: cleanPhone });
       
-      if (data.data.requestId) {
+      if (data?.data?.requestId) {
         setRequestId(data.data.requestId);
         setStep(2);
         setTimer(30);
       } else {
-        alert("Failed to send OTP");
+        setErrorMessage(data.message || "Failed to send OTP. Please try again.");
       }
     } catch (error: any) {
-      console.error("Login Error:", error);
-      alert(error.response?.data?.message || "Login failed. Check your connection.");
+      console.error("Login API Error:", error);
+      // Extract the specific message from the backend response if available
+      const backendMessage = error.response?.data?.message || error.message || "Login failed. Check your connection.";
+      setErrorMessage(backendMessage);
     } finally {
       setLoading(false);
     }
@@ -52,25 +70,31 @@ export default function LoginPage() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
     setLoading(true);
     
     try {
       const data = await UserService.verifyLogin({
-        phone,
+        phone: phone.replace(/\D/g, ""),
         requestId,
         otp,
         deviceInfo: navigator.userAgent,
       });
 
-      if (data.data.accessToken) {
+      if (data.data?.accessToken) {
         setAuthToken(data.data.accessToken);
-        router.push("/home"); 
+        // Store user info if returned
+        if (data.data.user) {
+            localStorage.setItem('user', JSON.stringify(data.data.user));
+        }
+        router.push("/"); 
       } else {
-        alert("Invalid OTP");
+        setErrorMessage(data.message || "Invalid OTP. Please try again.");
       }
     } catch (error: any) {
-      console.error("Verify Error:", error);
-      alert(error.response?.data?.message || "Verification failed.");
+      console.error("Verify API Error:", error);
+      const backendMessage = error.response?.data?.message || "Verification failed.";
+      setErrorMessage(backendMessage);
     } finally {
       setLoading(false);
     }
@@ -78,13 +102,14 @@ export default function LoginPage() {
 
   const handleResend = async () => {
     if (timer > 0) return;
+    setErrorMessage("");
     setLoading(true);
     try {
-      await UserService.resendLoginOtp({ phone });
+      await UserService.resendLoginOtp({ phone: phone.replace(/\D/g, "") });
       setTimer(30);
       alert("OTP Resent Successfully!");
-    } catch (error) {
-       alert("Failed to resend OTP");
+    } catch (error: any) {
+       setErrorMessage(error.response?.data?.message || "Failed to resend OTP");
     } finally {
        setLoading(false);
     }
@@ -108,6 +133,21 @@ export default function LoginPage() {
         </p>
       </div>
 
+      {/* Error Message Display */}
+      <AnimatePresence>
+        {errorMessage && (
+            <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 flex items-start gap-2"
+            >
+                <AlertCircle className="text-red-500 w-5 h-5 mt-0.5 shrink-0" />
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">{errorMessage}</p>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {step === 1 ? (
           <motion.form
@@ -128,8 +168,8 @@ export default function LoginPage() {
                   type="tel"
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                  placeholder="98765 43210"
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} // Only allow numbers
+                  placeholder="9876543210"
                   maxLength={10}
                   className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition-all dark:text-white text-lg tracking-wide placeholder:text-gray-400"
                 />

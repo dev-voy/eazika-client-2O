@@ -108,9 +108,15 @@ export const UserService = {
     return response.data;
   },
 
+  // FIX: Make logout resilient. Even if API fails, return success so client clears token.
   logout: async () => {
-    const response = await axiosInstance.post('/users/logout');
-    return response.data;
+    try {
+      const response = await axiosInstance.post('/users/logout');
+      return response.data;
+    } catch (error) {
+      console.warn("Logout API failed (Network Error). Proceeding with local logout.");
+      return { success: true };
+    }
   },
   
   refresh: async (refreshToken?: string) => {
@@ -137,7 +143,6 @@ export const UserService = {
 
   // --- ADDRESSES ---
 
-  // Assumed Endpoint: GET /users/user/addresses (Standard REST convention)
   getAddresses: async () => {
     const response = await axiosInstance.get<Address[]>('/users/user/addresses'); 
     return response.data;
