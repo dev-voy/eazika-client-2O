@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Providers } from "@/app/components/Providers"; 
+import Providers from "@/components/Providers";
 import { GOOGLE_ANALYTICS_ID } from "@/app/utils/constants"; // CHANGED: Import
 import "./globals.css";
 import Script from "next/script";
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   // CHANGED: Now using the constant
-  const getAnalyticsId = GOOGLE_ANALYTICS_ID; 
+  const getAnalyticsId = GOOGLE_ANALYTICS_ID;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -38,8 +38,16 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)" />
+        <meta
+          name="theme-color"
+          content="#FFFFFF"
+          media="(prefers-color-scheme: light)"
+        />
+        <meta
+          name="theme-color"
+          content="#111827"
+          media="(prefers-color-scheme: dark)"
+        />
         <meta name="color-scheme" content="light dark" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
@@ -48,7 +56,7 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: `{"@context":"https://schema.org","@type":"Organization","name":"Eazika","url":"https://eazika.com","logo":"https://eazika.com/logo.png","description":"EAZIKA is India's fastest e-commerce platform.","sameAs":["https://www.instagram.com/eazika.india"]}`
+            __html: `{"@context":"https://schema.org","@type":"Organization","name":"Eazika","url":"https://eazika.com","logo":"https://eazika.com/logo.png","description":"EAZIKA is India's fastest e-commerce platform.","sameAs":["https://www.instagram.com/eazika.india"]}`,
           }}
         />
         {getAnalyticsId && (
@@ -71,7 +79,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-background text-foreground transition-colors duration-300`}
       >
-        <Providers>{children}</Providers> 
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
