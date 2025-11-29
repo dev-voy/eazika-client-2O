@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import axios from "@/lib/axios";
+import axios, { getToken } from "@/lib/axios";
 
 function PushNotificationProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -11,8 +11,8 @@ function PushNotificationProvider({ children }: { children: React.ReactNode }) {
           return subscription !== null;
         })
         .catch(() => false);
-
-      if (!isSubscribed) await registerAndSubscribe();
+      const token = await getToken("accessToken");
+      if (!isSubscribed && token) await registerAndSubscribe();
     })();
   });
 
