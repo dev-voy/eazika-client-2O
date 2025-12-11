@@ -1,53 +1,62 @@
 import axiosInstance from "@/lib/axios";
 
-
 export interface AdminUser {
   id: number;
   name: string;
   email: string;
   role: string;
+  phone: string;
+  isActive: boolean;
   createdAt: string;
-}
-
-export interface ProductCategory {
-  id: number;
-  name: string;
-  description?: string;
 }
 
 export const AdminService = {
   
+  getStats: async () => {
+    const response = await axiosInstance.get("/admin/stats");
+    return response.data.data;
+  },
+
   
   getAllUsers: async (page = 1, limit = 10) => {
     const response = await axiosInstance.get(`/admin/users/get-all-users`, {
       params: { page, limit },
     });
-    
     return response.data.data;
   },
 
   
-  
-  getAllCategories: async () => {
-    const response = await axiosInstance.get("/admin/products/get-categories");
-    return response.data.data.categories;
+  getAllShops: async (status = "all") => {
+    const response = await axiosInstance.get(`/admin/shops/get-all`, {
+      params: { status },
+    });
+    return response.data.data;
   },
 
-  
-  
-  createCategory: async (name: string, description: string) => {
-    const response = await axiosInstance.post(
-      "/admin/products/create-category",
+  verifyShop: async (shopId: number, status: "active" | "rejected") => {
+    const response = await axiosInstance.patch(
+      `/admin/shops/${shopId}/verify`,
       {
-        name,
-        description,
+        status,
       }
     );
     return response.data.data;
   },
 
   
-  
+  getAllCategories: async () => {
+    const response = await axiosInstance.get("/admin/products/get-categories");
+    return response.data.data.categories;
+  },
+
+  createCategory: async (name: string, description: string) => {
+    const response = await axiosInstance.post(
+      "/admin/products/create-category",
+      { name, description }
+    );
+    return response.data.data;
+  },
+
   createGlobalProduct: async (data: any) => {
     const response = await axiosInstance.post(
       "/admin/products/add-global",
@@ -56,8 +65,6 @@ export const AdminService = {
     return response.data.data;
   },
 
-  
-  
   createGlobalProductsBulk: async (products: any[]) => {
     const response = await axiosInstance.post(
       "/admin/products/add-global-in-bluk",
