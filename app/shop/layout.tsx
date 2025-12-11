@@ -7,13 +7,13 @@ import { ShopSidebar } from "@/app/components/ShopSidebar";
 import {
   LayoutDashboard,
   Package,
-  ShoppingBag,
   User,
-  Menu,
   Store,
-  BarChart3,
   Users,
   History,
+  // Menu,
+  // BarChart3,
+  // ShoppingBag,
 } from "lucide-react";
 
 export default function ShopLayout({
@@ -24,10 +24,10 @@ export default function ShopLayout({
   const pathname = usePathname();
 
   const mobileNavItems = [
-    { name: "Home", href: "/shop", icon: LayoutDashboard },
-    { name: "Analysis", href: "/shop/analysis", icon: BarChart3 },
-    { name: "Products", href: "/shop/products", icon: Package },
+    // { name: "Analysis", href: "/shop/analysis", icon: BarChart3 },
     // { name: 'Orders', href: '/shop/orders', icon: ShoppingBag },
+    { name: "Home", href: "/shop", icon: LayoutDashboard },
+    { name: "Products", href: "/shop/products", icon: Package },
     { name: "History", href: "/shop/history", icon: History },
     { name: "Riders", href: "/shop/riders", icon: Users },
     { name: "Profile", href: "/shop/detail", icon: User },
