@@ -105,5 +105,14 @@ export const DeliveryService = {
   toggleAvailability: async (status: boolean) => {
     const response = await axiosInstance.patch('/delivery/availability', { isOnline: status });
     return response.data;
+  },
+
+  // Get nearby shops for registration
+  getNearbyShops: async (lat: number, lng: number) => {
+    // Assuming an endpoint exists or using a general shop search
+    const response = await axiosInstance.get('/delivery/shops/nearby', { 
+        params: { lat, lng } 
+    });
+    return response.data;
   }
 };
