@@ -32,7 +32,11 @@ export default function LocationGuard() {
   // 2. Open the modal if the user hasn't selected a location yet
   useEffect(() => {
     if (!isLocationVerified) {
+      // Small delay to prevent flash if hydration is super fast? 
+      // No, for now just direct logic. 
       setIsOpen(true);
+    } else {
+      setIsOpen(false);
     }
   }, [isLocationVerified]);
 
