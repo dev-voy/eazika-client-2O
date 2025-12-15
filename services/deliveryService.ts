@@ -114,11 +114,18 @@ export const DeliveryService = {
   },
 
   // Get nearby shops for registration
-  getNearbyShops: async (lat: number, lng: number) => {
+  // Get nearby shops for registration
+  getNearbyShops: async (lat?: number, lng?: number, city?: string) => {
     // Assuming an endpoint exists or using a general shop search
     const response = await axiosInstance.get('/delivery/shops/nearby', { 
-        params: { lat, lng } 
+        params: { lat, lng, city } 
     });
-    return response.data;
+    // Fix: Extract .data from ApiResponse wrapper
+    return response.data.data;
+  },
+
+  getAvailableCities: async () => {
+      const response = await axiosInstance.get('/delivery/cities/available');
+      return response.data.data;
   }
 };

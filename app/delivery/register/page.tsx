@@ -194,6 +194,48 @@ export default function DeliveryRegistrationPage() {
 
   // --- Helper Components ---
 
+  // --- City Selection Logic ---
+  const fetchShopsByCity = async (city: string) => {
+      setIsLoadingShops(true);
+      try {
+          const data = await DeliveryService.getNearbyShops(undefined, undefined, city);
+          setNearbyShops(data || []);
+      } catch (error) {
+          toast.error("Failed to fetch shops for this city");
+      } finally {
+          setIsLoadingShops(false);
+      }
+  };
+
+  const CitySelector = ({ onSelect }: { onSelect: (city: string) => void }) => {
+      const [cities, setCities] = useState<string[]>([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+          DeliveryService.getAvailableCities()
+            .then(data => setCities(data))
+            .catch(() => toast.error("Failed to load cities"))
+            .finally(() => setLoading(false));
+      }, []);
+
+      if (loading) return <div className="text-gray-400 text-sm">Loading cities...</div>;
+
+      return (
+          <div className="grid grid-cols-2 gap-3">
+              {cities.map(city => (
+                  <button 
+                    key={city}
+                    onClick={() => onSelect(city)}
+                    className="p-3 border rounded-lg hover:border-green-500 hover:bg-green-50 transition text-gray-700 font-medium"
+                  >
+                      {city}
+                  </button>
+              ))}
+              {cities.length === 0 && <p className="col-span-2 text-gray-500 text-sm">No cities available</p>}
+          </div>
+      );
+  };
+
   const ShopCard = ({ shop }: { shop: Shop }) => (
       <div 
           onClick={() => handleSelectShop(shop.id)}
@@ -231,60 +273,57 @@ export default function DeliveryRegistrationPage() {
         {step === 'select-shop' && (
             <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100 min-h-[400px]">
                 <div className="flex flex-col items-center justify-center space-y-6">
-                    {!locationPermission && nearbyShops.length === 0 ? (
-                        <div className="text-center py-10">
-                            <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <MapPin className="text-blue-500 h-10 w-10" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Enable Location</h3>
-                            <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-                                We need your location to find shops available for delivery partnerships in your area.
-                            </p>
-                            <button
+                    
+                    {/* City Selection & Search Mode Toggle */}
+                    <div className="w-full mb-4">
+                        <div className="flex gap-2 justify-center mb-6">
+                             <button 
+                                onClick={() => setLocationPermission(false)}
+                                className={`px-4 py-2 rounded-full text-sm font-bold border transition ${!locationPermission ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}
+                             >
+                                Search by City
+                             </button>
+                             <button 
                                 onClick={handleGetLocation}
-                                disabled={isLoadingShops}
-                                className="bg-blue-600 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-700 transition flex items-center gap-2 mx-auto disabled:opacity-70"
-                            >
-                                {isLoadingShops ? <Loader2 className="animate-spin" /> : <MapPin size={18} />}
-                                {isLoadingShops ? "Finding Shops..." : "Find Nearby Shops"}
-                            </button>
-                            {locationError && (
-                                <p className="text-red-500 text-sm mt-4">{locationError}</p>
-                            )}
+                                className={`px-4 py-2 rounded-full text-sm font-bold border transition ${locationPermission ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'}`}
+                             >
+                                Use GPS Location
+                             </button>
+                        </div>
+                    </div>
+
+                    {!locationPermission ? (
+                        <div className="w-full max-w-sm mx-auto text-center">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Select City</h3>
+                            <CitySelector onSelect={(city) => fetchShopsByCity(city)} />
                         </div>
                     ) : (
-                        <div className="w-full">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="font-bold text-lg text-gray-900">Available Shops</h3>
-                                <button 
-                                    onClick={handleGetLocation}
-                                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                                >
-                                    <MapPin size={14} /> Refresh Location
-                                </button>
-                            </div>
-
-                            {isLoadingShops ? (
-                                <div className="flex justify-center py-20">
-                                    <Loader2 className="animate-spin text-blue-500" size={32} />
-                                </div>
-                            ) : nearbyShops.length > 0 ? (
-                                <div className="space-y-3">
-                                    {nearbyShops.map(shop => (
-                                        <ShopCard key={shop.id} shop={shop} />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                                    <Store className="mx-auto text-gray-400 mb-3" size={40} />
-                                    <h4 className="font-bold text-gray-900">No Shops Found</h4>
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        We couldn't find any shops looking for riders in your current location.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+                        /* GPS Location View (existing logic mostly) */
+                        isLoadingShops ? (
+                             <div className="flex justify-center py-10">
+                                <Loader2 className="animate-spin text-blue-500" size={32} />
+                                <p className="ml-2 text-gray-500">Locating...</p>
+                             </div>
+                        ) : null
                     )}
+
+                    {/* Shop List Display */}
+                    <div className="w-full mt-6">
+                         {!isLoadingShops && nearbyShops.length > 0 && (
+                             <div className="space-y-3">
+                                <h3 className="font-bold text-lg text-gray-900 mb-2">Available Shops</h3>
+                                {nearbyShops.map(shop => (
+                                    <ShopCard key={shop.id} shop={shop} />
+                                ))}
+                             </div>
+                         )}
+
+                         {!isLoadingShops && nearbyShops.length === 0 && (locationPermission || locationError) && (
+                            <div className="text-center py-8">
+                                <p className="text-gray-500">No shops found. Try a different city or location.</p>
+                            </div>
+                         )}
+                    </div>
                 </div>
             </div>
         )}
