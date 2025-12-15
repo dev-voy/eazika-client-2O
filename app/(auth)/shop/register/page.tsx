@@ -364,7 +364,7 @@ export default function ShopRegistrationPage() {
                       <option value="furniture">Furniture</option>
                       <option value="clothing">Clothing</option>
                       <option value="bakery">Bakery</option>
-                      <option value="hmoeAppliances">Home Appliances</option>
+                      <option value="homeAppliances">Home Appliances</option>
                       <option value="others">Others</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">

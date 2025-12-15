@@ -323,7 +323,7 @@ export default function AddGlobalProductPage() {
                       try {
                         setIsLoading(true);
                         
-                        // 1. Get Signed URLs
+                        // 1. Get Signed URLs using defined axiosInstance
                         const { data: { files: signedData } } = await import("@/lib/axios").then(m => m.default.post("/uploads/product", {
                           files: files.map(f => ({ fileName: f.name, contentType: f.type }))
                         }));
