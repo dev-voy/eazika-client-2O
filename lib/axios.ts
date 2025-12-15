@@ -2,13 +2,14 @@ import axios, { isAxiosError } from "axios";
 // import { useUserStore } from "@/hooks/useUserStore";
 
 const SERVER_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL || "https://server.eazika.com";
+  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 const BASE_URL = `${SERVER_URL}/api/v2`;
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
 async function getToken(tokenName: string): Promise<string | null> {
