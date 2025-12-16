@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useDeliveryStore } from '@/hooks/useDeliveryStore';
-import { DeliveryService } from '@/services/deliveryService';
+import { DeliveryService, DeliveryProfile } from '@/services/deliveryService';
 import { 
     User, Bike, CheckCircle, Edit, Save, Camera, Upload, Loader2, FileBadge, FileText 
 } from 'lucide-react';
@@ -27,7 +27,7 @@ export default function DeliveryProfilePage() {
     const [formData, setFormData] = useState({
         vehicleName: '',
         vehicleNo: '',
-        vechicleOwnerName: '', 
+        vehicleOwnerName: '', 
         licenseNumber: ''
     });
 
@@ -43,7 +43,7 @@ export default function DeliveryProfilePage() {
             setFormData({
                 vehicleName: profile.vehicleName || '',
                 vehicleNo: profile.vehicleNo || '',
-                vechicleOwnerName: profile.vechicleOwnerName || '',
+                vehicleOwnerName: profile.vehicleOwnerName || '',
                 licenseNumber: profile.licenseNumber || ''
             });
         }
@@ -187,18 +187,20 @@ export default function DeliveryProfilePage() {
                                     {[
                                         { label: 'Vehicle Model', key: 'vehicleName' as keyof typeof formData },
                                         { label: 'Vehicle Number', key: 'vehicleNo' as keyof typeof formData },
-                                        { label: 'Owner Name', key: 'vechicleOwnerName' as keyof typeof formData }
+                                        { label: 'Owner Name', key: 'vehicleOwnerName' as keyof typeof formData }
                                     ].map((field) => (
                                         <div key={field.key}>
                                             <label className="text-xs text-gray-500 uppercase font-bold block mb-1">{field.label}</label>
                                             {isEditing ? (
                                                 <input 
-                                                    value={formData[field.key]}
+                                                    value={formData[field.key as keyof typeof formData]} 
                                                     onChange={e => setFormData({...formData, [field.key]: e.target.value})}
                                                     className="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-green-500 outline-none"
                                                 />
                                             ) : (
-                                                <p className="text-gray-200 font-medium">{profile[field.key]}</p>
+                                                <p className="text-gray-200 font-medium">
+                                                    {profile[field.key as keyof DeliveryProfile]}
+                                                </p>
                                             )}
                                         </div>
                                     ))}
@@ -209,7 +211,7 @@ export default function DeliveryProfilePage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-gray-800 p-4 rounded-2xl border border-gray-700 text-center">
                                     <h4 className="text-gray-400 text-xs font-bold uppercase">Total Earnings</h4>
-                                    <p className="text-2xl font-bold text-white mt-1">₹12,450</p>
+                                    <p className="text-2xl font-bold text-white mt-1">{profile.totalEarnings ? `₹${profile.totalEarnings.toLocaleString()}` : '₹0'}</p>
                                 </div>
                                 <Link href="/delivery/history" className="block">
                                     <div className="bg-gray-800 p-4 rounded-2xl border border-gray-700 text-center hover:bg-gray-700 transition-colors cursor-pointer">

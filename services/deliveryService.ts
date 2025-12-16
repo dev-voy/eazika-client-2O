@@ -39,6 +39,7 @@ export interface DeliveryProfile {
   name?: string;
   phone?: string;
   image?: string;
+  totalEarnings?: number;
 }
 
 export interface DeliveryOrder {
