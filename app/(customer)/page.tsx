@@ -9,10 +9,10 @@ import Link from "next/link";
 import { useWishlistStore } from "@/hooks/useWishlistStore";
 import { useCartStore } from "@/store";
 import { useLocationStore } from "@/store/locationStore"; // IMPORT STORE
-import { ShopService, Category } from "@/services/shopService";
+import { Category } from "@/services/shopService";
 import coustomerService from "@/services/customerService";
 import type { ProductType } from "@/types";
-import { categories as mockCategories } from "@/app/data/mockData";
+// import { categories as mockCategories } from "@/app/data/mockData";
 
 // Animation Variants
 const containerVariants: Variants = {
@@ -74,26 +74,31 @@ export default function HomePage() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [catsData, prodsData] = await Promise.all([
-          // ShopService.getCategories(),
-          [],
-          // PASS CITY TO API
-          await coustomerService.getProducts(1, 20, currentCity),
-        ]);
+        // const [catsData, prodsData] = await Promise.all([
+        //   // ShopService.getCategories(),
+        //   [],
+        //   // PASS CITY TO API
+        //   await coustomerService.getProducts(1, 20, currentCity),
+        // ]);
+        const prodsData = await coustomerService.getProducts(
+          1,
+          10,
+          currentCity
+        );
 
         // Map icons manually since backend doesn't send component references
-        const mappedCategories = catsData.map((cat: any) => {
-          const match = mockCategories.find(
-            (m) =>
-              m.name.toLowerCase() === cat.name.toLowerCase() ||
-              cat.name.toLowerCase().includes(m.slug) ||
-              m.slug.includes(cat.name.toLowerCase())
-          );
-          return {
-            ...cat,
-            icon: match ? match.icon : undefined,
-          };
-        });
+        // const mappedCategories = catsData.map((cat: any) => {
+        //   const match = mockCategories.find(
+        //     (m) =>
+        //       m.name.toLowerCase() === cat.name.toLowerCase() ||
+        //       cat.name.toLowerCase().includes(m.slug) ||
+        //       m.slug.includes(cat.name.toLowerCase())
+        //   );
+        //   return {
+        //     ...cat,
+        //     icon: match ? match.icon : undefined,
+        //   };
+        // });
 
         // setCategories(mappedCategories);
         setProducts(prodsData.products);
